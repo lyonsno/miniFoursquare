@@ -1,11 +1,12 @@
 <!doctype html>
-<title>Sign Up<title>
+<title>Sign Up</title>
 {% if result == None %}
-	<h1>Hello {{ session['username'] }}!</h1>
-		<form method='POST'><input type=submit value="logout" name="logout"></form>
-{% else %}
-	<h1>Hello, World!</h1>
-        <form method='POST'><input type=text name="username">
-		<input type=submit value=login name=login></form>
-		<form method='POST'><input type=submit value=signup name=signup></form>
+	<h1>please enter a username</h1>
+		<form method='POST'><input type=submit value="create" name="create">
+		<input type=text name=username></form>
+{% elif result == 'success' %}
+	<h1>Success! your username has been created.</h1>
+        <form method='POST'><input type=submit value=continue name=gohome></form>
+{% elif result == 'failure' %}
+	<h1>Unable to create username.</h1>
 {% endif %}

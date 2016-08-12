@@ -11,7 +11,7 @@ def index():
 	if request.method == 'POST':
 
 		if 'login' in request.form:
-			session['username'] = request.form['username']
+			login_user(request.form['username'], session)
 
 		elif 'logout' in request.form:
 			session.pop('username', None)
@@ -25,19 +25,30 @@ def index():
 def signup():
 	result = None
 	if request.method == 'POST':
-		if validate_signup(request.form['username'], request.form['password']):
-			add_user(request.form['username'], request.form['password'])
-			result = 'success!'
+		if 'gohome' in request.form:
+			return redirect(url_for('index'))
+		elif 'username' in request.form:
+			if not validate_signup(request.form['username']):
+				result = 'failure'
+			else: 
+				username = request.form['username']
+				add_user(username)
+				login_user(username, session)
+				result = 'success'
 		else:
-			result = 'error'
-	
+			result = 'failure'
+		print("post!")
+	print("rendering")
 	return render_template('signup.html', result=result)
 
-def validate_signup(username, password):
+def validate_signup(username):
 	return True
 
-def add_user(username, password):
+def add_user(username):
 	return True
+
+def login_user(username, session):
+	session['username'] = username
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
