@@ -15,48 +15,7 @@ app.config['MONGO_URI'] = 'mongodb://heroku_47hcqr8r:8qrmbmda85l7dmtjc9cnvc9bpl@
 mongo = PyMongo(app)
 app.secret_key = str(urandom(24))
 
-login_manager = LoginManager()
-login_manager.init_app(app)
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-
-	if form.validate_on_submit():
-		login_user(user)
-
-@login_manager.user_loader
-def load_user(user_id):
-	return User.get(user_id)
-
-# this is a placeholder, not at all secure
-class LoginForm():
-
-	def __init__(self, username, password):
-		self.username = userName
-		self.password = password
-		self._id = None
-
-	def validate_on_submit():
-		return 
-
 class User(MethodView):
-
-	def __init__(self):
-		self.authenticated = True
-		self.is_active = True
-		self.is_anonymous = False
-
-	def is_authenticated(self):
-		return self.authenticated
-
-	def is_active(self):
-		return self.isActive
-
-	def is_anonymous(self):
-		return self.isAnonymous
-
-	def get_id(self):
-		return self._id
 
 	def get(self, user_id):
 		if user_id is None:
@@ -113,12 +72,6 @@ class Review():
 		self.userName
 
 class Business(MethodView):
-
-	def __init__(self):
-		jsonDict = json_util.loads(jsonObj)
-		self.name = jsonDict["name"]
-		self.reviewIds = jsonDict["reviewIds"]
-		self.location = jsonDict["location"]
 
 	def get(self, business_id):
 		if business_id is None:
