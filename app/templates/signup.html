@@ -1,12 +1,17 @@
 <!doctype html>
-<title>Sign Up</title>
+{% extends "main.html" %}
+
+{% block title %} Sign Up! {% endblock %}
+
+{% block content %}
 {% if result == None %}
-	<h1>please enter a username</h1>
+	<h2>please enter a username</h2>
 		<form method='POST'><input type=submit value="create" name="create">
 		<input type=text name=username></form>
 {% elif result == 'success' %}
-	<h1>Success! your username has been created.</h1>
+	<h2>Success! your username has been created.</h2>
         <form method='POST'><input type=submit value=continue name=gohome></form>
 {% elif result == 'failure' %}
-	<h1>Unable to create username.</h1>
+	<h2>Unable to create username.</h2>
 {% endif %}
+{% endblock %}

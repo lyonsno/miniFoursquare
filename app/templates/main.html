@@ -1,11 +1,19 @@
 <!doctype html>
-<title>Hello from Flask</title>
-{% if 'username' in session %}
-	<h1>Hello {{ session['username'] }}!</h1>
-		<form method='POST'><input type=submit value="logout" name="logout"></form>
-{% else %}
-	<h1>Hello, World!</h1>
-        <form method='POST'><input type=text name="username">
-		<input type=submit value=login name=login></form>
-		<form method='POST'><input type=submit value=signup name=signup></form>
-{% endif %}
+
+<style>
+h2 {
+	font-size: 16px;
+}
+</style>
+
+<title>{% block title %}Hello from Flask{% endblock %}</title>	
+<h1>mini Foursquare</h1>
+{% block content %}{% endblock %}
+
+<h3> ------------------------------------------ </h3>
+	<!-- <form method='POST'> -->
+ 	<!-- <input type=submit value="View Buisnesses" name="viewbuisnesses"> -->
+	<!-- <input type=submit value="Home" name="home"> -->
+	<!-- </form> -->
+	<a href="/">home </a> -
+	<a href="/buisinesses">view buisinesses </a>
