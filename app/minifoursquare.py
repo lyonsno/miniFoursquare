@@ -86,18 +86,19 @@ class User(MethodView):
 		# delete a single user
 		result = mongo.db.users.delete_one({'_id' : ObjectId(user_id)})
 		if result.deleted_count != 1:
-			return "404 user not found"
+			return "404 user not found for delete"
 		else: 
 			return "200 user deleted"
 
 	def put(self, user_id):
 		# update a single user
+		# don't think we really need this one yet
 		pass
 
-user_view = User.as_view('user')
-app.add_url_rule('/users/', defaults={'user_id' : None}, view_func=user_view, methods=['GET'])
-app.add_url_rule('/users/', view_func=user_view, methods=['POST'])
-app.add_url_rule('/users/<user_id>', view_func=user_view, methods=['GET', 'PUT', 'DELETE'])
+userView = User.as_view('user')
+app.add_url_rule('/users/', defaults={'user_id' : None}, view_func=userView, methods=['GET'])
+app.add_url_rule('/users/', view_func=userView, methods=['POST'])
+app.add_url_rule('/users/<user_id>', view_func=userView, methods=['GET', 'PUT', 'DELETE'])
 
 class Review():
 	
@@ -111,39 +112,54 @@ class Review():
 		self.userId
 		self.userName
 
-class Business():
+class Business(MethodView):
 
-	def __init__(self, jsonObj):
+	def __init__(self):
 		jsonDict = json_util.loads(jsonObj)
 		self.name = jsonDict["name"]
 		self.reviewIds = jsonDict["reviewIds"]
 		self.location = jsonDict["location"]
 
-class UserAPI(MethodView):
+	def get(self, business_id):
+		if business_id is None:
+			#return a list of all businesses
+			cursor = mongo.db.businesses.find({})
+			biz_jsons = {'businesses' : []}
+			for doc in cursor:
+				biz_jsons['businesses'].append(doc)
+			biz_jsons = json_util.dumps(biz_jsons, default=json_util.default)
+			return biz_jsons
 
-	def get(self, user_id):
-		if user_id is None:
-			#return a list of users
-			pass
 		else:
-			# expose a single user
-			pass
+			# expose single business
+			biz = mongo.db.businesss.find_one_or_404({'_id' : ObjectId(business_id)})
+			biz_json = json_util.dumps(biz, default=json_util.default)
+			return biz_json
 
 	def post(self):
-		# create a new user
+		# create a new business
 		form = request.form
-		user = {"name" : form["name"], "reviewIds" : form["reviewIds"] }
-		mongo.db.users.insert_one(user)
-		return str(user)
+		biz = {"businessName" : form["businessName"], "reviewIds" : form["reviewIds"], "location" : form["location"]}
+		mongo.db.businesses.insert_one(biz)
+		return json_util.dumps(biz, default=json_util.default)
 
-	def delete(self, user_id):
-		# delete a single user
+	def delete(self, business_id):
+		# delete a single business
+		result = mongo.db.businesses.delete_one({'_id' : ObjectId(business_id)})
+		if result.deleted_count != 1:
+			return "404 business not found for delete"
+		else:
+			return "200 business deleted"
+
+	def put(self, business_id):
+		# update a single business
+		# dont need this yet
 		pass
 
-	def put(self, user_id):
-		# update a single user
-		pass
-
+businessView = Business.as_view('business')
+app.add_url_rule('/businesses/', defaults={'business_id' : None}, view_func=businessView, methods=['GET'])
+app.add_url_rule('/businesses/', view_func=businessView, methods=['POST'])
+app.add_url_rule('/businesses/<business_id>', view_func=businessView, methods=['GET', 'PUT' 'DELETE'])
 
 
 # endpoint for leaving review of business
