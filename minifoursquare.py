@@ -107,7 +107,7 @@ class Review(MethodView):
 								)
 
 		# update business tags and average rating
-
+		
 
 		return json_util.dumps(review, default=json_util.default)
 
@@ -201,4 +201,6 @@ app.add_url_rule('/businesses/', defaults={'businessId' : None}, view_func=busin
 app.add_url_rule('/businesses/', view_func=businessView, methods=['POST'])
 app.add_url_rule('/businesses/<businessId>', view_func=businessView, methods=['GET', 'PUT' 'DELETE'])
 
+if __name__ == '__main__':
+    app.run()
 
