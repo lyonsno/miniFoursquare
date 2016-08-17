@@ -78,17 +78,17 @@ class Review(MethodView):
 
 	def post(self):
 		# create a new review
-
 		form = request.form
 		review = {
 					"numStars" : form["numStars"],
 					"text" : form["text"], 
-					"tags" : form["tags"],
+					"tags" : form.getlist("tags"),
 					"userId" : form["userId"],
 					"businessId" : form["businessId"]
 				  }
 		result = mongo.db.reviews.insert_one(review)
 
+		# add review id to corresponding user and business
 		mongo.db.users.update(
 								{"_id" : ObjectId(form["userId"])},
 								{'$push': { "reviewIds" : result.inserted_id }},
@@ -99,6 +99,15 @@ class Review(MethodView):
 									{'$push': {"reviewIds" : result.inserted_id }},
 									False
 								)
+		# increment review count for business
+		mongo.db.businesses.update(
+									{"_id" : ObjectId(form["businessId"])},
+									{'$inc' : {"numReviews" : 1}},
+									True
+								)
+
+		# update business tags and average rating
+
 
 		return json_util.dumps(review, default=json_util.default)
 
@@ -111,6 +120,7 @@ class Review(MethodView):
 			return "404 review not found for delete"
 
 		else:
+			# delete review id from user and business
 			mongo.db.users.update(
 									{"_id" : ObjectId(review['userId'])},
 									{'$pull': { "reviewIds" : ObjectId(reviewId) }},
@@ -121,6 +131,11 @@ class Review(MethodView):
 										{'$pull': {"reviewIds" : ObjectId(reviewId) }},
 										False
 									)
+			mongo.db.businesses.update(
+									{"_id" : ObjectId(review["businessId"])},
+									{'$inc' : {"numReviews" : -1}},
+									False
+								)
 
 			return "200 user deleted"
 
@@ -155,7 +170,16 @@ class Business(MethodView):
 	def post(self):
 		# create a new business
 		form = request.form
-		biz = {"businessName" : form["businessName"], "reviewIds" : [], "location" : [ form["long"], form["lat"] ]}
+		biz = {
+				"businessName" : form["businessName"],
+				"reviewIds" : [],
+				"numReviews" : 0,
+				"location" : [ form["long"], form["lat"] ],
+				"averageRating" : None,
+				"tags" : []
+
+			}
+
 		mongo.db.businesses.insert_one(biz)
 		return json_util.dumps(biz, default=json_util.default)
 
@@ -176,77 +200,5 @@ businessView = Business.as_view('business')
 app.add_url_rule('/businesses/', defaults={'businessId' : None}, view_func=businessView, methods=['GET'])
 app.add_url_rule('/businesses/', view_func=businessView, methods=['POST'])
 app.add_url_rule('/businesses/<businessId>', view_func=businessView, methods=['GET', 'PUT' 'DELETE'])
-
-
-# endpoint for leaving review of business
-@app.route('/businesses/<bizName>/reviews', methods=['GET', 'POST'])
-def reviews(bizName):
-	if request.method == 'POST':
-
-		mongo.db.reviews.insert_one({request.form})
-		mongo.db.businesses.update({'name' : bizName}, {'$push' : {'reviews' : reviewId}}, True)
-
-# endpoint for getting business data json
-@app.route('/business/<bizId>/data', methods=['GET'])
-def buisness_data(bizId):
-	biz = mongo.db.businesses.find({'_id' : bizId})
-	return json_util.dumps(biz)
-
-@app.route('/', methods=['POST', 'GET'])
-def index():
-	invalidLogin = False
-	if request.method == 'POST':
-
-		if 'login' in request.form:
-			if not login_user(request.form['username'], session):
-				invalidLogin = True
-
-		elif 'logout' in request.form:
-			session.pop('username', None)
-
-		elif 'signup' in request.form:
-			return redirect(url_for('signup'))
-
-	return render_template('index.html', invalidLogin=invalidLogin)
-
-@app.route('/signup', methods=['POST', 'GET'])
-def signup():
-	result = None
-	if request.method == 'POST':
-		if 'gohome' in request.form:
-			return redirect(url_for('index'))
-		elif 'username' in request.form:
-			result = try_create_user(request.form['username'])
-
-	if result == 'success':
-		login_user(request.form['username'], session)
-
-	return render_template('signup.html', result=result)
-
-def try_create_user(username):
-	if not user_exists(request.form['username']):
-		username = request.form['username']
-		create_user(username)
-		login_user(username, session)
-		return 'success'
-	else:
-		return 'failure'
-def create_user(username):
-	mongo.db.users.insert_one({'username': username})
-
-def user_exists(username):
-	user = mongo.db.users.find_one({'username': username})
-	if user is None:
-		return False
-	else:
-		return True
-
-def login_user(username, session):
-	if user_exists(username):
-		session['username'] = username
-		return True
-	else:
-		return False
-
 
 
