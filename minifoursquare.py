@@ -17,6 +17,7 @@ app.secret_key = str(urandom(24))
 class User(MethodView):
 
 	def get(self, userId):
+		return "I'm loading"
 		if userId is None:
 			#return a list of users
 			cursor = mongo.db.users.find({})
