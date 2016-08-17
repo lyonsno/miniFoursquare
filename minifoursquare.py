@@ -54,6 +54,7 @@ class User(MethodView):
 
 userView = User.as_view('user')
 app.add_url_rule('/users/', defaults={'userId' : None}, view_func=userView, methods=['GET'])
+app.add_url_rule('/', defaults={'userId' : None}, view_func=userView, methods=['GET'])
 app.add_url_rule('/users/', view_func=userView, methods=['POST'])
 app.add_url_rule('/users/<userId>', view_func=userView, methods=['GET', 'PUT', 'DELETE'])
 
