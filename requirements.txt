@@ -7,7 +7,6 @@ docopt==0.6.2
 Flask==0.11.1
 Flask-Login==0.3.2
 Flask-PyMongo==0.4.1
-graphics==1.0
 itsdangerous==0.24
 Jinja2==2.8
 lxml==3.6.0
