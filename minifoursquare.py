@@ -14,6 +14,10 @@ app.config['MONGO_URI'] = 'mongodb://heroku_47hcqr8r:8qrmbmda85l7dmtjc9cnvc9bpl@
 mongo = PyMongo(app)
 app.secret_key = str(urandom(24))
 
+@app.route('/'):
+def home():
+	return "minifoursquarehome"
+	
 class User(MethodView):
 
 	def get(self, userId):
